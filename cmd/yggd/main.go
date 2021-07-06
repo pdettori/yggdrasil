@@ -33,10 +33,13 @@ import (
 var ClientID = ""
 
 type TransportType string
-
+type ClientIDSource string
 const (
 	MQTT TransportType = "mqtt"
 	HTTP TransportType = "http"
+
+	CertCN ClientIDSource = "cert-cn"
+	MachineID ClientIDSource = "machine-id"
 )
 
 func main() {
@@ -116,6 +119,12 @@ func main() {
 			Value:  "localhost:8888",
 			Hidden: true,
 		},
+		&cli.StringFlag{
+			Name:   "client-id-source",
+			Usage:  "Source of the client-id used to connect to remote servers. Possible values: cert-cn, machine-id",
+			Value:  "cert-cn",
+			Hidden: true,
+		},
 	}
 
 	// This BeforeFunc will load flag values from a config file only if the
@@ -182,9 +191,9 @@ func main() {
 			return cli.Exit(fmt.Errorf("cannot kill workers: %w", err), 1)
 		}
 
-		ClientID, err = parseCertCN(c.String("cert-file"))
+		ClientID, err = getClientID(c)
 		if err != nil {
-			return cli.Exit(fmt.Errorf("cannot parse certificate: %w", err), 1)
+			return cli.Exit(err, 1)
 		}
 
 		// Read certificates, create a TLS config, and initialize HTTP client
@@ -414,5 +423,25 @@ func createDataHandler(d *dispatcher) func(msg []byte) {
 		}
 		log.Tracef("message: %+v", data)
 		d.sendQ <- data
+	}
+}
+
+func getClientID(c *cli.Context) (string, error) {
+	source := ClientIDSource(c.String("client-id-source"))
+	switch source {
+	case CertCN:
+		clientID, err := parseCertCN(c.String("cert-file"))
+		if err != nil {
+			return "", fmt.Errorf("cannot parse certificate: %w", err)
+		}
+		return clientID, nil
+	case MachineID:
+		facts, err := yggdrasil.GetCanonicalFacts()
+		if err != nil {
+			return "", err
+		}
+		return facts.MachineID, nil
+	default:
+		return "", fmt.Errorf("unsupported client ID source: %v", source)
 	}
 }
