@@ -5,6 +5,17 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync/atomic"
+	"syscall"
+	"time"
+
 	"git.sr.ht/~spc/go-log"
 	"github.com/google/uuid"
 	"github.com/redhatinsights/yggdrasil"
@@ -18,27 +29,18 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
 	"google.golang.org/grpc"
-	"io/ioutil"
-	"net"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync/atomic"
-	"syscall"
-	"time"
 )
 
 var ClientID = ""
 
 type TransportType string
 type ClientIDSource string
+
 const (
 	MQTT TransportType = "mqtt"
 	HTTP TransportType = "http"
 
-	CertCN ClientIDSource = "cert-cn"
+	CertCN    ClientIDSource = "cert-cn"
 	MachineID ClientIDSource = "machine-id"
 )
 
@@ -288,10 +290,12 @@ func main() {
 		if err != nil {
 			return cli.Exit(fmt.Errorf("cannot read contents of directory: %w", err), 1)
 		}
-
+		configDir := filepath.Join(yggdrasil.SysconfDir, yggdrasil.LongName)
 		env := []string{
 			"YGG_SOCKET_ADDR=unix:" + c.String("socket-addr"),
 			"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+			"BASE_CONFIG_DIR=" + configDir,
+			"LOG_LEVEL=" + level.String(),
 		}
 		for _, info := range fileInfos {
 			if strings.HasSuffix(info.Name(), "worker") {
