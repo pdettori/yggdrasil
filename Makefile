@@ -66,6 +66,11 @@ ifeq ($(shell find . -name vendor), ./vendor)
 BUILDFLAGS += -mod=vendor
 endif
 
+ARCH ?=
+ifneq ($ARCH,)
+	export GOARCH=$(ARCH)
+endif
+
 BINS = yggd ygg
 DATA = ygg.bash \
 	   ygg.1.gz \
