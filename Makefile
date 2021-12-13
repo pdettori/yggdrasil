@@ -67,11 +67,6 @@ ifeq ($(shell find . -name vendor), ./vendor)
 BUILDFLAGS += -mod=vendor
 endif
 
-ARCH ?= x86_64
-ifeq ($(ARCH),aarch64)
-	export GOARCH=arm64
-endif
-
 BINS = yggd
 DATA = yggd.bash \
 	   yggd.1.gz \
