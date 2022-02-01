@@ -50,7 +50,7 @@ func (t *Transport) Start() error {
 			if err != nil {
 				log.Tracef("Error while getting work: %v", err)
 			}
-			if payload != nil && len(payload) > 0 {
+			if len(payload) > 0 {
 				t.controlHandler(payload, t)
 			}
 			time.Sleep(t.pollingInterval)
@@ -66,7 +66,7 @@ func (t *Transport) Start() error {
 			if err != nil {
 				log.Tracef("Error while getting work: %v", err)
 			}
-			if payload != nil && len(payload) > 0 {
+			if len(payload) > 0 {
 				t.dataHandler(payload)
 			}
 			time.Sleep(t.pollingInterval)
