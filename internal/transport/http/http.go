@@ -106,5 +106,5 @@ func (t *Transport) send(message interface{}, channel string) error {
 }
 
 func (t *Transport) getUrl(direction string, channel string) string {
-	return fmt.Sprintf("http://%s/api/k4e-management/v1/%s/%s/%s", t.Server, channel, t.ClientID, direction)
+	return fmt.Sprintf("http://%s/api/flotta-management/v1/%s/%s/%s", t.Server, channel, t.ClientID, direction)
 }
