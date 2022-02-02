@@ -50,7 +50,7 @@ func (t *Transport) Start() error {
 			if err != nil {
 				log.Tracef("Error while getting work: %v", err)
 			}
-			if payload != nil && len(payload) > 0 {
+			if len(payload) > 0 {
 				t.controlHandler(payload, t)
 			}
 			time.Sleep(t.pollingInterval)
@@ -66,7 +66,7 @@ func (t *Transport) Start() error {
 			if err != nil {
 				log.Tracef("Error while getting work: %v", err)
 			}
-			if payload != nil && len(payload) > 0 {
+			if len(payload) > 0 {
 				t.dataHandler(payload)
 			}
 			time.Sleep(t.pollingInterval)
@@ -106,5 +106,5 @@ func (t *Transport) send(message interface{}, channel string) error {
 }
 
 func (t *Transport) getUrl(direction string, channel string) string {
-	return fmt.Sprintf("http://%s/api/k4e-management/v1/%s/%s/%s", t.Server, channel, t.ClientID, direction)
+	return fmt.Sprintf("http://%s/api/flotta-management/v1/%s/%s/%s", t.Server, channel, t.ClientID, direction)
 }
